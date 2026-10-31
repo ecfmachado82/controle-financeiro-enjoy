@@ -6,11 +6,12 @@ const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;"
 const money=n=>Number.isFinite(Number(n))?new Intl.NumberFormat("pt-BR",{style:"currency",currency:"BRL"}).format(Number(n)):"—";
 const pct=n=>n===null||!Number.isFinite(Number(n))?"—":Number(n).toLocaleString("pt-BR",{maximumFractionDigits:2,minimumFractionDigits:2})+"%";
 let api=null;
+function dateOf(value){if(!value)return "Sem data";if(/^\d{4}-\d{2}-\d{2}$/.test(value))return value.split("-").reverse().join("/");const d=new Date(value);return Number.isFinite(d.valueOf())?d.toLocaleString("pt-BR",{timeZone:"America/Sao_Paulo"}):String(value)}
 function render(){
  const positions=api&&api.getPositions?api.getPositions():[];
  const filtered=selected?positions.filter(x=>String(x.ticker).toUpperCase()===selected):positions;
  const idx=new Map(cached.map(x=>[x.ticker,x]));
- root.innerHTML='<div class="market-head"><div><h2>Mercado e rentabilidade</h2><p class="small muted">Cotações apenas para consulta — não alteram o valor cadastrado na sua carteira.</p></div><div><button id="marketRefresh">↻ Atualizar preços</button><span class="small muted" id="marketStamp">'+esc(timestamp)+'</span></div></div>'+
+ root.innerHTML='<div class="market-head"><div><h2>Mercado e rentabilidade</h2><p class="small muted">B3: preço de fechamento do último pregão. Criptos: preço Spot e variação de 24h. Sem cadastro em API; sua carteira não é alterada.</p></div><div><button id="marketRefresh">↻ Atualizar preços</button><span class="small muted" id="marketStamp">'+esc(timestamp)+'</span></div></div>'+
  (selected?'<button id="marketClear">← Ver todos os ativos</button>':"")+
  '<div class="scroll"><table><thead><tr><th>Ativo</th><th class="right">Cotação BRL</th><th class="right">Variação dia / 24h</th><th class="right">Posição ao preço de mercado</th><th class="right">Resultado total*</th><th>Origem e data</th></tr></thead><tbody>'+
  (filtered.length?filtered.map(p=>{
@@ -22,7 +23,7 @@ function render(){
   const color=ok&&c.changePercent!==null?(c.changePercent<0?"var(--red)":"var(--teal)"):"var(--muted)";
   return '<tr data-market="'+esc(p.ticker)+'"><td><b>'+esc(p.ticker)+'</b><div class="small muted">'+esc(p.category)+'</div></td>'+
   '<td class="right">'+(ok?money(c.price):"—")+'</td><td class="right" style="color:'+color+'">'+(ok?pct(c.changePercent):"—")+'</td><td class="right">'+(currentValue===null?"—":money(currentValue))+'</td>'+
-  '<td class="right">'+(gain===null?"—":money(gain))+'</td><td class="small">'+esc(c?(c.source||"")+(c.status!=="ok"?" — "+(c.message||"indisponível"):c.asOf?" — "+new Date(c.asOf).toLocaleString("pt-BR"):""):"Aguardando consulta")+'</td></tr>';
+  '<td class="right">'+(gain===null?"—":money(gain))+'</td><td class="small">'+esc(c?(c.source||"")+(c.status!=="ok"?" — "+(c.message||"indisponível"):c.asOf?" — "+dateOf(c.asOf):""):"Aguardando consulta")+'</td></tr>';
  }).join(""):'<tr><td colspan="6" class="muted">Cadastre investimentos para acompanhar as cotações.</td></tr>')+'</tbody></table></div>'+
  '<p class="small muted">* Resultado total = valor de mercado − (quantidade × preço de compra) + proventos informados. Não inclui taxas, impostos ou operações anteriores. Preencha o preço de compra e os proventos no cadastro. Renda fixa sem cotação automática nesta etapa.</p>';
  root.querySelector("#marketRefresh").onclick=refresh;
