@@ -1,0 +1,27 @@
+name: Security checks
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  static-security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: JavaScript syntax
+        run: |
+          set -euo pipefail
+          find . -type f \( -name '*.js' -o -name '*.cjs' \) -not -path './.git/*' -print0 | xargs -0 -n1 node --check
+      - name: Security regression tests
+        run: node --test test/security.test.cjs
+      - name: Reject known secret key patterns in client scripts
+        run: |
+          set -euo pipefail
+          if grep -RE 'sb_secret_|service_role[[:space:]]*:|ghp_[A-Za-z0-9]{30,}|sk_live_[A-Za-z0-9]+' --include='*.js' --include='*.html' .; then
+            echo "Possible secret in source code!"
+            exit 1
+          fi
