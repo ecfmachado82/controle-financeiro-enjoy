@@ -43,7 +43,12 @@ async function getQuote(raw){
  }
  if(B3.test(ticker)){
    try{
-     const data=await getJSON("https://capitalagora.com.br/api/ativo/"+ticker);
+     let data,lastError;
+     for(const host of ["https://capital-agora-production.up.railway.app","https://capitalagora.com.br"]){
+       try{data=await getJSON(host+"/api/ativo/"+ticker);break;}
+       catch(err){lastError=err;if(err.code===404)break;}
+     }
+     if(!data)throw lastError||new Error("Fonte indisponível");
      const price=num(data.preco);
      if(price===null||price<=0)throw Error("Sem preço de fechamento");
      const kind=String(data.tipo||"").toLowerCase();
