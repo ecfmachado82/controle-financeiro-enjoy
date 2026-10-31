@@ -26,10 +26,10 @@ module.exports=async function handler(req,res){
  suggestions.push({ticker:q.toUpperCase(),name:"Consultar ticker da B3",category:"B3"});
  const control=new AbortController(),timeout=setTimeout(()=>control.abort(),6000);
  try{
-   const response=await fetch("https://capitalagora.com.br/api/sugerir?q="+encodeURIComponent(q),{headers:{Accept:"application/json"},signal:control.signal});
+   const response=await fetch("https://capital-agora-production.up.railway.app/api/sugerir?q="+encodeURIComponent(q),{headers:{Accept:"application/json"},signal:control.signal});
    if(response.ok){
     const body=await response.json();
-    const rows=Array.isArray(body)?body:Array.isArray(body.sugestoes)?body.sugestoes:Array.isArray(body.resultados)?body.resultados:Array.isArray(body.result)?body.result:Array.isArray(body.results)?body.results:Array.isArray(body.ativos)?body.ativos:Array.isArray(body.data)?body.data:[];
+    const rows=Array.isArray(body)?body:Array.isArray(body.itens)?body.itens:Array.isArray(body.sugestoes)?body.sugestoes:Array.isArray(body.resultados)?body.resultados:Array.isArray(body.result)?body.result:Array.isArray(body.results)?body.results:Array.isArray(body.ativos)?body.ativos:Array.isArray(body.data)?body.data:[];
     for(const item of rows.slice(0,12)){
       const s=normalized(item);
       if(s&&!suggestions.some(x=>x.ticker===s.ticker))suggestions.push(s);
