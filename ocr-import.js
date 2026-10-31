@@ -151,9 +151,9 @@ window.InvestmentImageImport={parseImageText:parseImageText,attach:function(api)
           res=await api.db.from("investment_positions").insert(Object.assign({user_id:userId},p)).select("id").single();
         }
         if(res.error)throw res.error;success++;
-      }catch(err){errors.push(item.ticker+": "+(err.message||String(err)));}
+      }catch(err){errors.push(item.ticker+": não foi possível salvar esta posição.");}
    }
-   try{await api.refresh();}catch(err){errors.push("Recarregar: "+err.message);}
+   try{await api.refresh();}catch(err){errors.push("Não foi possível atualizar o painel após salvar.");}
    setBusy(false);
    if(!errors.length){modal.close();cleanup();alert(success+" investimento(s) salvo(s) no Supabase.");}
    else statusText(success+" salvos. Falhas: "+errors.join(" / ")+". Confira sua carteira antes de repetir a importação.");
