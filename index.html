@@ -25,7 +25,7 @@
 .market-head{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}.market-head h2{margin:0}.market-head p{margin:4px 0}.market-head button{margin-right:10px}#marketPanel tr[data-market]{cursor:pointer}#marketPanel tr[data-market]:hover{background:#21324c}</style></head><body>
 <section id="authScreen" class="auth-page"><div class="auth-box">
 <h1>↗ Meu Patrimônio <span style="color:var(--teal)">/ BI</span></h1>
-<p class="muted">Acesse sua carteira pessoal protegida.</p>
+<p class="muted">Acesse sua carteira pessoal protegida.</p><p><a href="/cotacoes.html" style="display:inline-block;border:1px solid var(--teal);color:var(--teal);padding:11px 14px;border-radius:10px;text-decoration:none;font-weight:700">🔎 Pesquisar cotações sem cadastro</a></p><p class="small muted">A consulta de mercado é pública e não exige conta.</p>
 <form id="authForm"><label id="nameLabel" style="display:none">Nome completo<input id="authName" autocomplete="name" maxlength="120"></label>
 <label id="emailLabel">E-mail<input id="authEmail" type="email" autocomplete="email" required></label>
 <label id="passLabel">Senha<input id="authPass" type="password" autocomplete="current-password" minlength="6" required></label>
@@ -36,7 +36,7 @@
 </div></section>
 <div id="appScreen" hidden>
 <div class="wrap"><header class="head"><div><h1>↗ Meu Patrimônio <span style="color:var(--teal)">/ BI</span></h1><div class="muted">Dashboard pessoal de investimentos</div></div>
-<div class="actions"><span class="user-pill" id="userEmail"></span><button id="logout">Sair</button><button id="import">↑ Importar backup</button><button id="reset">↺ Zerar carteira</button><button id="backup">↓ Backup JSON</button><button id="csv">↓ CSV</button><button id="importImage" title="Ler um print e revisar antes de cadastrar">📷 Importar por imagem</button><button class="primary" id="add">+ Adicionar</button></div></header>
+<div class="actions"><a href="/cotacoes.html" style="display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:10px;padding:10px 14px;color:var(--teal);text-decoration:none">🔎 Consultar cotações</a><span class="user-pill" id="userEmail"></span><button id="logout">Sair</button><button id="import">↑ Importar backup</button><button id="reset">↺ Zerar carteira</button><button id="backup">↓ Backup JSON</button><button id="csv">↓ CSV</button><button id="importImage" title="Ler um print e revisar antes de cadastrar">📷 Importar por imagem</button><button class="primary" id="add">+ Adicionar</button></div></header>
 <div class="notice"><strong>Privacidade:</strong> ao criar sua conta você começa com <strong>R$ 0,00 e nenhum investimento cadastrado</strong>. Os investimentos são salvos no Supabase e protegidos para que somente o titular da conta possa consultá-los. Não compartilhe sua senha. <strong>As cotações não são atualizadas automaticamente.</strong></div>
 <div class="grid filters"><label>Categoria<select id="category"><option value="">Todas</option></select></label><label>Tipo<select id="type"><option value="">Todos</option></select></label><label>Origem<select id="source"><option value="">Todas</option></select></label><label>Buscar ativo<input id="search" placeholder="Ticker, nome, corretora"></label></div>
 <div class="grid kpis" id="kpis"></div>
