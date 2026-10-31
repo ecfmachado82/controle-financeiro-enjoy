@@ -4,22 +4,37 @@
 <style>
 :root{color-scheme:dark;--bg:#0b1220;--panel:#162238;--line:#2b3c54;--text:#edf4fb;--muted:#9fb1c7;--teal:#41d7ac;--blue:#78aafc;--purple:#ae92ff;--gold:#f4bf70;--red:#ff8094}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}button,input,select{font:inherit}button{cursor:pointer;border:1px solid var(--line);background:#21314b;color:var(--text);border-radius:10px;padding:10px 14px}button:hover{border-color:var(--blue)}.primary{background:#168d73;color:white;border-color:#168d73}.wrap{max-width:1250px;margin:auto;padding:24px}.head{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:24px}.head h1{margin:0;font-size:27px}.muted{color:var(--muted)}.small{font-size:12px}.actions{display:flex;flex-wrap:wrap;gap:8px}.notice{margin-top:20px;padding:15px 18px;border:1px solid #3b5368;background:#17283a;border-radius:14px}.grid{display:grid;gap:16px}.filters{grid-template-columns:repeat(4,minmax(0,1fr));margin:24px 0}.filters label,.form label{display:flex;flex-direction:column;gap:6px;color:var(--muted);font-size:13px}select,input{border:1px solid var(--line);border-radius:9px;padding:11px;background:#101b2d;color:var(--text);min-width:0;width:100%}.kpis{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:16px}.card{background:var(--panel);border:1px solid var(--line);padding:20px;border-radius:16px;min-width:0}.metric{font-size:24px;font-weight:800;margin-top:5px}.charts{grid-template-columns:1fr 1fr;margin-bottom:16px}.card h2{font-size:17px;margin:0 0 14px}.donutrow{display:flex;align-items:center;justify-content:center;gap:22px;flex-wrap:wrap}.donut{width:210px;height:210px;border-radius:50%;display:grid;place-items:center;flex-shrink:0}.hole{border-radius:50%;width:132px;height:132px;background:var(--panel);display:grid;place-items:center;text-align:center}.hole strong{font-size:17px}.legend{flex:1;min-width:180px}.leg{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:9px;cursor:pointer;border-bottom:1px solid var(--line)}.leg:hover,.bar:hover,tbody tr:hover{background:#20304a}.dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:8px}.bar{cursor:pointer;margin:15px 0;padding:6px;border-radius:8px}.barline{display:flex;justify-content:space-between;gap:12px;font-size:13px}.track{height:11px;background:#2a3952;border-radius:8px;margin-top:6px;overflow:hidden}.fill{height:100%;border-radius:8px}.scroll{overflow:auto}table{width:100%;border-collapse:collapse;white-space:nowrap}th,td{text-align:left;padding:12px 10px;border-bottom:1px solid var(--line)}th{color:var(--muted);font-size:12px}tbody tr{cursor:pointer}.right{text-align:right}.empty{padding:22px;color:var(--muted)}dialog{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:16px;width:min(590px,95vw);max-height:90vh}dialog::backdrop{background:#000a}.form{display:grid;grid-template-columns:1fr 1fr;gap:12px}.modalactions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;margin-top:18px}.detail{display:flex;justify-content:space-between;border-bottom:1px solid var(--line);padding:9px 0;gap:15px}.foot{margin-top:18px;color:var(--muted);font-size:12px}@media(max-width:850px){.filters,.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.charts{grid-template-columns:1fr}}@media(max-width:530px){.wrap{padding:12px}.head h1{font-size:21px}.filters,.kpis,.form{grid-template-columns:1fr}.metric{font-size:22px}}
+.auth-page{min-height:100vh;display:grid;place-items:center;padding:20px}.auth-box{background:var(--panel);border:1px solid var(--line);padding:30px;border-radius:18px;width:min(450px,100%)}.auth-box h1{margin:0 0 5px}.auth-box input{margin:5px 0 12px}.auth-box label{font-size:13px;color:var(--muted)}.auth-switch{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}.auth-error{min-height:24px;color:var(--gold);font-size:13px;margin-top:9px}.user-pill{font-size:12px;color:var(--muted);padding:10px}.busy{opacity:.55;pointer-events:none}
 </style></head><body>
+<section id="authScreen" class="auth-page"><div class="auth-box">
+<h1>↗ Meu Patrimônio <span style="color:var(--teal)">/ BI</span></h1>
+<p class="muted">Acesse sua carteira pessoal protegida.</p>
+<form id="authForm"><label id="nameLabel" style="display:none">Nome completo<input id="authName" autocomplete="name" maxlength="120"></label>
+<label>E-mail<input id="authEmail" type="email" autocomplete="email" required></label>
+<label id="passLabel">Senha<input id="authPass" type="password" autocomplete="current-password" minlength="6" required></label>
+<button id="authSubmit" class="primary" style="width:100%" type="submit">Entrar</button></form>
+<div id="authMessage" class="auth-error" aria-live="polite"></div>
+<div class="auth-switch"><button id="modeLogin" type="button">Entrar</button><button id="modeSignup" type="button">Criar cadastro</button><button id="modeReset" type="button">Esqueci minha senha</button></div>
+<p class="small muted">Cada conta possui uma carteira independente. Suas posições ficam armazenadas no Supabase e podem ser acessadas em outros dispositivos.</p>
+</div></section>
+<div id="appScreen" hidden>
 <div class="wrap"><header class="head"><div><h1>↗ Meu Patrimônio <span style="color:var(--teal)">/ BI</span></h1><div class="muted">Dashboard pessoal de investimentos</div></div>
-<div class="actions"><button id="import">↑ Importar backup</button><button id="reset">↺ Zerar carteira</button><button id="backup">↓ Backup JSON</button><button id="csv">↓ CSV</button><button class="primary" id="add">+ Adicionar</button></div></header>
-<div class="notice"><strong>Privacidade:</strong> este site começa com <strong>R$ 0,00 e nenhum investimento cadastrado</strong>. Clique em <strong>+ Adicionar</strong> para criar suas posições diretamente aqui. Os dados ficam neste navegador (localStorage), não são enviados ao GitHub. <strong>As cotações não são atualizadas automaticamente.</strong></div>
+<div class="actions"><span class="user-pill" id="userEmail"></span><button id="logout">Sair</button><button id="import">↑ Importar backup</button><button id="reset">↺ Zerar carteira</button><button id="backup">↓ Backup JSON</button><button id="csv">↓ CSV</button><button class="primary" id="add">+ Adicionar</button></div></header>
+<div class="notice"><strong>Privacidade:</strong> ao criar sua conta você começa com <strong>R$ 0,00 e nenhum investimento cadastrado</strong>. Os investimentos são salvos no Supabase e protegidos para que somente o titular da conta possa consultá-los. Não compartilhe sua senha. <strong>As cotações não são atualizadas automaticamente.</strong></div>
 <div class="grid filters"><label>Categoria<select id="category"><option value="">Todas</option></select></label><label>Tipo<select id="type"><option value="">Todos</option></select></label><label>Origem<select id="source"><option value="">Todas</option></select></label><label>Buscar ativo<input id="search" placeholder="Ticker, nome, corretora"></label></div>
 <div class="grid kpis" id="kpis"></div>
 <div class="grid charts"><section class="card"><h2>Distribuição por categoria</h2><div class="small muted">Clique na legenda para detalhar</div><div class="donutrow"><div class="donut" id="donut"><div class="hole" id="donutcenter"></div></div><div class="legend" id="legend"></div></div></section><section class="card"><h2>Posições por investimento</h2><div class="small muted">Clique nas barras para abrir os detalhes (drill-down)</div><div id="bars"></div></section></div>
 <div class="grid charts"><section class="card"><h2>Resultado informado por ativo</h2><div id="gains"></div></section><section class="card"><h2>Diagnóstico</h2><div id="diagnostics"></div><p class="small muted">Sem histórico de aportes, o painel não representa evolução patrimonial real.</p></section></div>
 <section class="card"><h2>Posições detalhadas</h2><div class="scroll"><table><thead><tr><th>Ativo</th><th>Categoria</th><th>Origem</th><th class="right">Quantidade</th><th class="right">Valor atual</th><th class="right">Resultado</th><th class="right">Participação</th></tr></thead><tbody id="rows"></tbody></table></div></section>
-<div class="foot">Dados carregados localmente. Faça backup em JSON após editar. Em navegadores ou dispositivos diferentes, importe o backup novamente. Esta página não oferece aconselhamento financeiro.</div>
-</div><input type="file" id="file" accept=".json,application/json" hidden><dialog id="dlg"><div id="dialogcontent"></div></dialog>
+<div class="foot">Dados sincronizados com sua conta Supabase. Mantenha backups periódicos. Esta página não oferece aconselhamento financeiro.</div>
+</div></div><input type="file" id="file" accept=".json,application/json" hidden><dialog id="dlg"><div id="dialogcontent"></div></dialog>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.0/dist/umd/supabase.min.js"></script>
 <script>
 (function(){
 "use strict";
-var key="meuBIinvestimentos2026",data=[];
-try{var saved=JSON.parse(localStorage.getItem(key));if(Array.isArray(saved))data=saved}catch(e){}
+var data=[], user=null, authMode="login", initializing=false;
+var sb=window.supabase&&window.supabase.createClient("https://szaguedaoveaeldtvxvb.supabase.co","sb_publishable_M3yKQEbu9pxkgNJaX7RZhw_Ybiv3LIk",{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
+if(!sb){document.getElementById("authMessage").textContent="Não foi possível carregar o serviço de autenticação. Verifique sua conexão e recarregue a página.";return}
 var filters={category:"",type:"",source:"",search:""};
 var palette={"Renda fixa":"#41d7ac","Ações":"#78aafc","Fundos imobiliários":"#f4bf70","Criptomoedas":"#ae92ff"};
 var el=function(id){return document.getElementById(id)};
@@ -29,7 +44,16 @@ var percent=function(v){return new Intl.NumberFormat("pt-BR",{style:"percent",ma
 var escapeHTML=function(v){return String(v==null?"":v).replace(/[&<>"']/g,function(x){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[x]})};
 var total=function(xs){return xs.reduce(function(sum,x){return sum+(Number(x.value)||0)},0)};
 var selection=function(){return data.filter(function(x){return (!filters.category||x.category===filters.category)&&(!filters.type||x.type===filters.type)&&(!filters.source||x.source===filters.source)&&(!filters.search||(String(x.ticker)+" "+x.name+" "+x.source).toLowerCase().includes(filters.search.toLowerCase()))})};
-function save(){localStorage.setItem(key,JSON.stringify(data))}
+async function loadPositions(){
+ if(!user)return; var uid=user.id;
+ var result=await sb.from("investment_positions").select("id,ticker,name,category,type,source,qty,price,value,gain,notes").eq("user_id",uid).order("created_at",{ascending:true});
+ if(result.error)throw result.error;
+ if(!user||user.id!==uid)return;
+ data=result.data||[];render();
+}
+function notifyError(e){alert("Falha na sincronização: "+(e&&e.message?e.message:String(e))+". Nenhuma alteração local foi considerada salva.")}
+async function refresh(){try{await loadPositions()}catch(e){notifyError(e)}}
+function payload(a){return {user_id:user.id,ticker:a.ticker,name:a.name||"",category:a.category||"Outros",type:a.type||"",source:a.source||"",qty:a.qty??0,price:a.price,value:a.value??0,gain:a.gain,notes:a.notes||""}}
 function selectOptions(id){var vals=[...new Set(data.map(function(a){return a[id]}).filter(Boolean))].sort();el(id).innerHTML='<option value="">Todas</option>'+vals.map(function(v){return '<option value="'+escapeHTML(v)+'">'+escapeHTML(v)+'</option>'}).join("");el(id).value=filters[id]}
 function render(){
 ["category","type","source"].forEach(selectOptions);el("search").value=filters.search;
@@ -54,21 +78,44 @@ function close(){el("dlg").close()}
 function detail(id){var a=data.find(function(x){return x.id===id});if(!a)return;
 el("dialogcontent").innerHTML='<h2>'+escapeHTML(a.ticker)+'</h2><div class="muted">'+escapeHTML(a.name)+'</div><h1>'+money(a.value)+'</h1>'+Object.entries({"Categoria":a.category,"Tipo":a.type,"Origem":a.source,"Quantidade":number(a.qty),"Preço de referência":money(a.price),"Resultado informado":money(a.gain),"Observações":a.notes||"—"}).map(function(x){return '<div class="detail"><span>'+x[0]+'</span><b>'+escapeHTML(x[1])+'</b></div>'}).join("")+'<div class="modalactions"><button id="close">Fechar</button><button class="primary" id="edit">Editar posição</button></div>';
 el("dlg").showModal();el("close").onclick=close;el("edit").onclick=function(){close();edit(id)}}
-function edit(id){var old=data.find(function(x){return x.id===id})||{},fields=[["ticker","Código"],["name","Nome"],["category","Categoria"],["type","Tipo"],["source","Origem"],["qty","Quantidade"],["price","Preço de referência (R$)"],["value","Valor atual (R$)"],["gain","Resultado (R$)"],["notes","Observações"]];
-el("dialogcontent").innerHTML='<h2>'+(id?"Editar investimento":"Adicionar investimento")+'</h2><form id="form"><div class="form">'+fields.map(function(f){var k=f[0];if(k==="category")return '<label>Categoria<select name="category"><option value="">Selecione</option>'+["Renda fixa","Ações","Fundos imobiliários","Criptomoedas"].map(function(c){return '<option value="'+c+'" '+(old.category===c?"selected":"")+'>'+c+'</option>'}).join("")+'</select></label>';return '<label>'+f[1]+'<input name="'+k+'" value="'+escapeHTML(old[k]??"")+'" '+(["qty","price","value","gain"].includes(k)?'type="number" step="any"':'type="text"')+' '+(["ticker","value"].includes(k)?"required":"")+'></label>'}).join("")+'</div><div class="modalactions"><button type="button" id="cancel">Cancelar</button>'+(id?'<button type="button" id="remove">Excluir</button>':"")+'<button class="primary" type="submit">Salvar</button></div></form>';
+function edit(id){if(!user)return;var old=data.find(function(x){return x.id===id})||{},fields=[["ticker","Código"],["name","Nome"],["category","Categoria"],["type","Tipo"],["source","Origem"],["qty","Quantidade"],["price","Preço de referência (R$)"],["value","Valor atual (R$)"],["gain","Resultado (R$)"],["notes","Observações"]];
+el("dialogcontent").innerHTML='<h2>'+(id?"Editar investimento":"Adicionar investimento")+'</h2><form id="form"><div class="form">'+fields.map(function(f){var k=f[0];if(k==="category")return '<label>Categoria<select name="category" required><option value="">Selecione</option>'+["Renda fixa","Ações","Fundos imobiliários","Criptomoedas","Outros"].map(function(c){return '<option value="'+c+'" '+(old.category===c?"selected":"")+'>'+c+'</option>'}).join("")+'</select></label>';return '<label>'+f[1]+'<input name="'+k+'" value="'+escapeHTML(old[k]??"")+'" '+(["qty","price","value","gain"].includes(k)?'type="number" step="any" min="'+(k==="gain"?"-999999999999":"0")+'"':'type="text"')+' '+(["ticker","value"].includes(k)?"required":"")+'></label>'}).join("")+'</div><div class="modalactions"><button type="button" id="cancel">Cancelar</button>'+(id?'<button type="button" id="remove">Excluir</button>':"")+'<button class="primary" type="submit" id="positionSave">Salvar</button></div></form>';
 el("dlg").showModal();el("cancel").onclick=close;
-if(id)el("remove").onclick=function(){if(confirm("Excluir este investimento?")){data=data.filter(function(a){return a.id!==id});save();close();render()}};
-el("form").onsubmit=function(e){e.preventDefault();var f=new FormData(e.target),o={id:id||"manual"+Date.now()};fields.forEach(function(z){var v=f.get(z[0]);o[z[0]]=["qty","price","value","gain"].includes(z[0])?(v===""?null:Number(v)):v});if(!o.ticker||!isFinite(o.value)||o.value<0){alert("Informe código e valor válido.");return}if(id)data[data.findIndex(function(a){return a.id===id})]=Object.assign({},old,o);else data.push(o);save();close();render()}
+if(id)el("remove").onclick=async function(){if(!confirm("Excluir este investimento da sua conta?"))return;el("form").classList.add("busy");try{var res=await sb.from("investment_positions").delete().eq("id",id).eq("user_id",user.id);if(res.error)throw res.error;close();await loadPositions()}catch(e){notifyError(e)}finally{el("form").classList.remove("busy")}};
+el("form").onsubmit=async function(e){e.preventDefault();var f=new FormData(e.target),o={};fields.forEach(function(z){var v=f.get(z[0]);o[z[0]]=["qty","price","value","gain"].includes(z[0])?(v===""?null:Number(v)):String(v||"")});if(!o.ticker||!Number.isFinite(o.value)||o.value<0||!o.category){alert("Informe código, categoria e valor válido.");return}
+el("form").classList.add("busy");
+try{var q=id?sb.from("investment_positions").update(payload(o)).eq("id",id).eq("user_id",user.id):sb.from("investment_positions").insert(payload(o));var res=await q;if(res.error)throw res.error;close();await loadPositions()}catch(err){notifyError(err)}finally{el("form").classList.remove("busy")}
+}
 }
 function download(name,str,mime){var url=URL.createObjectURL(new Blob([str],{type:mime})),a=document.createElement("a");a.href=url;a.download=name;a.click();setTimeout(function(){URL.revokeObjectURL(url)},1000)}
 ["category","type","source"].forEach(function(k){el(k).onchange=function(e){filters[k]=e.target.value;render()}});
 el("search").oninput=function(e){filters.search=e.target.value;render();el("search").focus()};
-el("add").onclick=function(){edit()};
-el("reset").onclick=function(){if(!data.length){alert("A carteira já está vazia.");return}if(confirm("Apagar todas as posições deste navegador? Faça backup em JSON antes de continuar, se quiser preservar os dados.")){data=[];localStorage.removeItem(key);filters={category:"",type:"",source:"",search:""};render();alert("Carteira zerada. Agora você pode cadastrar seus investimentos pelo botão + Adicionar.")}};
-el("backup").onclick=function(){download("backup_investimentos.json",JSON.stringify({version:1,exportedAt:new Date().toISOString(),assets:data},null,2),"application/json")};
+
+el("add").onclick=function(){if(user)edit()};
+el("logout").onclick=async function(){var r=await sb.auth.signOut();if(r.error)notifyError(r.error);else{user=null;data=[];showAuth()}};
+el("reset").onclick=async function(){if(!user)return;if(!data.length){alert("A carteira já está vazia.");return}if(!confirm("EXCLUIR permanentemente TODOS os investimentos desta conta? Recomendamos fazer backup em JSON antes."))return;
+try{var res=await sb.from("investment_positions").delete().eq("user_id",user.id);if(res.error)throw res.error;filters={category:"",type:"",source:"",search:""};await loadPositions();alert("Carteira zerada no Supabase.")}catch(e){notifyError(e)}};
+el("backup").onclick=function(){download("backup_investimentos.json",JSON.stringify({version:2,exportedAt:new Date().toISOString(),assets:data},null,2),"application/json")};
 el("csv").onclick=function(){var keys=["ticker","name","category","type","source","qty","price","value","gain","notes"];download("carteira.csv","\ufeff"+keys.join(";")+"\r\n"+selection().map(function(a){return keys.map(function(k){return '"'+String(a[k]??"").replace(/"/g,'""')+'"'}).join(";")}).join("\r\n"),"text/csv;charset=utf-8")};
-el("import").onclick=function(){el("file").click()};
-el("file").onchange=async function(e){var f=e.target.files[0];if(!f)return;try{var obj=JSON.parse(await f.text()),arr=Array.isArray(obj)?obj:obj.assets;if(!Array.isArray(arr)||arr.some(function(a){return typeof a.ticker!=="string"||!isFinite(Number(a.value))}))throw Error("Arquivo inválido");if(confirm("Importar "+arr.length+" investimentos e substituir os dados locais?")){data=arr.map(function(a,i){return Object.assign({},a,{id:a.id||"import"+i})});save();filters={category:"",type:"",source:"",search:""};render()}}catch(err){alert("Erro: "+err.message)}e.target.value=""};
-render();
+el("import").onclick=function(){if(user)el("file").click()};
+el("file").onchange=async function(e){var f=e.target.files[0];if(!f)return;
+try{var obj=JSON.parse(await f.text()),arr=Array.isArray(obj)?obj:obj.assets;if(!Array.isArray(arr)||arr.some(function(a){return typeof a.ticker!=="string"||!isFinite(Number(a.value))||Number(a.value)<0}))throw Error("Arquivo inválido");
+if(!confirm("Adicionar "+arr.length+" posições à SUA conta? Os registros existentes serão mantidos."))return;
+var items=arr.map(function(a){return payload(a)});for(var i=0;i<items.length;i+=100){var res=await sb.from("investment_positions").insert(items.slice(i,i+100));if(res.error)throw res.error}await loadPositions();alert("Importação concluída.")}catch(err){notifyError(err)}finally{e.target.value=""}};
+function authMessage(msg){el("authMessage").textContent=msg||""}
+function showAuth(){el("appScreen").hidden=true;el("authScreen").hidden=false;el("authPass").value="";authMessage("");setMode("login")}
+function showApp(){el("authScreen").hidden=true;el("appScreen").hidden=false;el("userEmail").textContent=user.email||"Minha conta";render()}
+function setMode(mode){authMode=mode;el("nameLabel").style.display=mode==="signup"?"block":"none";el("authName").required=mode==="signup";el("passLabel").style.display=mode==="reset"?"none":"block";el("authPass").required=mode!=="reset";el("authPass").autocomplete=mode==="signup"?"new-password":"current-password";el("authSubmit").textContent=mode==="signup"?"Criar minha conta":mode==="reset"?"Enviar recuperação":"Entrar";authMessage("")}
+el("modeLogin").onclick=function(){setMode("login")};el("modeSignup").onclick=function(){setMode("signup")};el("modeReset").onclick=function(){setMode("reset")};
+el("authForm").onsubmit=async function(e){e.preventDefault();var email=el("authEmail").value.trim(),password=el("authPass").value,button=el("authSubmit");button.disabled=true;authMessage("");
+try{
+ if(authMode==="signup"){var opts={emailRedirectTo:location.origin, data:{display_name:el("authName").value.trim()}};var r=await sb.auth.signUp({email,password,options:opts});if(r.error)throw r.error;authMessage(r.data.session?"Conta criada!":"Cadastro recebido. Verifique seu e-mail para confirmar sua conta e depois entre.");}
+ else if(authMode==="reset"){var r=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin});if(r.error)throw r.error;authMessage("Se o e-mail estiver cadastrado, você receberá instruções para recuperar a senha.");}
+ else{var r=await sb.auth.signInWithPassword({email,password});if(r.error)throw r.error;}
+}catch(err){authMessage(err.message||"Não foi possível concluir a operação.")}finally{button.disabled=false}};
+async function sessionUpdate(nextUser){if((user&&nextUser&&user.id===nextUser.id)||(!user&&!nextUser))return;user=nextUser;data=[];if(!user){showAuth();return}showApp();try{await loadPositions()}catch(err){notifyError(err)}}
+sb.auth.onAuthStateChange(function(event,session){if(event==="PASSWORD_RECOVERY"){setMode("reset");authMessage("Use a opção de recuperação para solicitar uma nova senha.");return}setTimeout(function(){sessionUpdate(session&&session.user||null)},0)});
+(async function(){try{var r=await sb.auth.getUser();if(r.error&&r.error.name!=="AuthSessionMissingError")throw r.error;await sessionUpdate(r.data.user||null)}catch(err){showAuth();authMessage(err.message||"Falha ao carregar sessão.")}})();
+
 })();
 </script></body></html>
