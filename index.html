@@ -14,7 +14,7 @@
 <label id="passLabel">Senha<input id="authPass" type="password" autocomplete="current-password" minlength="6" required></label>
 <button id="authSubmit" class="primary" style="width:100%" type="submit">Entrar</button></form>
 <div id="authMessage" class="auth-error" aria-live="polite"></div>
-<div class="auth-switch"><button id="modeLogin" type="button">Entrar</button><button id="modeSignup" type="button">Criar cadastro</button><button id="modeReset" type="button">Esqueci minha senha</button></div>
+<div class="auth-switch"><button id="modeLogin" type="button">Entrar</button><button id="modeSignup" type="button">Criar cadastro</button><button id="modeReset" type="button">Esqueci minha senha</button><button id="resendConfirmation" type="button">Reenviar confirmação</button></div>
 <p class="small muted">Cada conta possui uma carteira independente. Suas posições ficam armazenadas no Supabase e podem ser acessadas em outros dispositivos.</p>
 </div></section>
 <div id="appScreen" hidden>
@@ -33,6 +33,7 @@
 (function(){
 "use strict";
 var data=[], user=null, authMode="login", recoveryMode=false;
+var PRODUCTION_URL="https://controle-financeiro-enjoy.vercel.app";
 var sb=window.supabase&&window.supabase.createClient("https://szaguedaoveaeldtvxvb.supabase.co","sb_publishable_M3yKQEbu9pxkgNJaX7RZhw_Ybiv3LIk",{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
 if(!sb){document.getElementById("authMessage").textContent="Não foi possível carregar o serviço de autenticação. Verifique sua conexão e recarregue a página.";return}
 var filters={category:"",type:"",source:"",search:""};
@@ -107,11 +108,23 @@ function showAuth(){el("appScreen").hidden=true;el("authScreen").hidden=false;el
 function showApp(){el("authScreen").hidden=true;el("appScreen").hidden=false;el("userEmail").textContent=user.email||"Minha conta";render()}
 function setMode(mode){authMode=mode;el("nameLabel").style.display=mode==="signup"?"block":"none";el("authName").required=mode==="signup";el("emailLabel").style.display=mode==="newpassword"?"none":"block";el("authEmail").required=mode!=="newpassword";el("passLabel").style.display=mode==="reset"?"none":"block";el("authPass").required=mode!=="reset";el("authPass").autocomplete=(mode==="signup"||mode==="newpassword")?"new-password":"current-password";el("authSubmit").textContent=mode==="signup"?"Criar minha conta":mode==="reset"?"Enviar recuperação":mode==="newpassword"?"Salvar nova senha":"Entrar";authMessage("")}
 el("modeLogin").onclick=function(){setMode("login")};el("modeSignup").onclick=function(){setMode("signup")};el("modeReset").onclick=function(){setMode("reset")};
+el("resendConfirmation").onclick=async function(){
+ var email=el("authEmail").value.trim();
+ if(!email){authMessage("Preencha seu e-mail antes de reenviar a confirmação.");el("authEmail").focus();return;}
+ el("resendConfirmation").disabled=true;
+ authMessage("Solicitando novo link de confirmação...");
+ try{
+   var r=await sb.auth.resend({type:"signup",email:email,options:{emailRedirectTo:PRODUCTION_URL}});
+   if(r.error)throw r.error;
+   authMessage("Se o cadastro estiver aguardando confirmação, um novo e-mail será enviado. Verifique também a caixa de spam.");
+ }catch(err){authMessage(err.message||"Não foi possível reenviar a confirmação agora.");}
+ finally{el("resendConfirmation").disabled=false;}
+};
 el("authForm").onsubmit=async function(e){e.preventDefault();var email=el("authEmail").value.trim(),password=el("authPass").value,button=el("authSubmit");button.disabled=true;authMessage("");
 try{
  if(authMode==="newpassword"){if(password.length<8)throw Error("Use ao menos 8 caracteres na nova senha.");var updated=await sb.auth.updateUser({password:password});if(updated.error)throw updated.error;recoveryMode=false;await sb.auth.signOut();showAuth();authMessage("Senha atualizada. Entre com sua nova senha.");}
- else if(authMode==="signup"){var opts={emailRedirectTo:location.origin, data:{display_name:el("authName").value.trim()}};var r=await sb.auth.signUp({email,password,options:opts});if(r.error)throw r.error;authMessage(r.data.session?"Conta criada!":"Cadastro recebido. Verifique seu e-mail para confirmar sua conta e depois entre.");}
- else if(authMode==="reset"){var r=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin});if(r.error)throw r.error;authMessage("Se o e-mail estiver cadastrado, você receberá instruções para recuperar a senha.");}
+ else if(authMode==="signup"){var opts={emailRedirectTo:PRODUCTION_URL, data:{display_name:el("authName").value.trim()}};var r=await sb.auth.signUp({email,password,options:opts});if(r.error)throw r.error;authMessage(r.data.session?"Conta criada!":"Cadastro recebido. Verifique seu e-mail para confirmar a conta. Se o link anterior falhou, corrija os redirecionamentos no Supabase e clique em Reenviar confirmação.");}
+ else if(authMode==="reset"){var r=await sb.auth.resetPasswordForEmail(email,{redirectTo:PRODUCTION_URL});if(r.error)throw r.error;authMessage("Se o e-mail estiver cadastrado, você receberá instruções para recuperar a senha.");}
  else{var r=await sb.auth.signInWithPassword({email,password});if(r.error)throw r.error;}
 }catch(err){authMessage(err.message||"Não foi possível concluir a operação.")}finally{button.disabled=false}};
 async function sessionUpdate(nextUser){if(recoveryMode)return;if((user&&nextUser&&user.id===nextUser.id)||(!user&&!nextUser))return;user=nextUser;data=[];if(!user){showAuth();return}showApp();try{var profile=await sb.from("investment_profiles").upsert({user_id:user.id,display_name:String(user.user_metadata&&user.user_metadata.display_name||"").slice(0,120)},{onConflict:"user_id",ignoreDuplicates:true});if(profile.error)throw profile.error;await loadPositions()}catch(err){notifyError(err)}}
