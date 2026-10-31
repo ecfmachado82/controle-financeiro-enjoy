@@ -5,6 +5,23 @@
 :root{color-scheme:dark;--bg:#0b1220;--panel:#162238;--line:#2b3c54;--text:#edf4fb;--muted:#9fb1c7;--teal:#41d7ac;--blue:#78aafc;--purple:#ae92ff;--gold:#f4bf70;--red:#ff8094}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}button,input,select{font:inherit}button{cursor:pointer;border:1px solid var(--line);background:#21314b;color:var(--text);border-radius:10px;padding:10px 14px}button:hover{border-color:var(--blue)}.primary{background:#168d73;color:white;border-color:#168d73}.wrap{max-width:1250px;margin:auto;padding:24px}.head{display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:24px}.head h1{margin:0;font-size:27px}.muted{color:var(--muted)}.small{font-size:12px}.actions{display:flex;flex-wrap:wrap;gap:8px}.notice{margin-top:20px;padding:15px 18px;border:1px solid #3b5368;background:#17283a;border-radius:14px}.grid{display:grid;gap:16px}.filters{grid-template-columns:repeat(4,minmax(0,1fr));margin:24px 0}.filters label,.form label{display:flex;flex-direction:column;gap:6px;color:var(--muted);font-size:13px}select,input{border:1px solid var(--line);border-radius:9px;padding:11px;background:#101b2d;color:var(--text);min-width:0;width:100%}.kpis{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:16px}.card{background:var(--panel);border:1px solid var(--line);padding:20px;border-radius:16px;min-width:0}.metric{font-size:24px;font-weight:800;margin-top:5px}.charts{grid-template-columns:1fr 1fr;margin-bottom:16px}.card h2{font-size:17px;margin:0 0 14px}.donutrow{display:flex;align-items:center;justify-content:center;gap:22px;flex-wrap:wrap}.donut{width:210px;height:210px;border-radius:50%;display:grid;place-items:center;flex-shrink:0}.hole{border-radius:50%;width:132px;height:132px;background:var(--panel);display:grid;place-items:center;text-align:center}.hole strong{font-size:17px}.legend{flex:1;min-width:180px}.leg{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:9px;cursor:pointer;border-bottom:1px solid var(--line)}.leg:hover,.bar:hover,tbody tr:hover{background:#20304a}.dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:8px}.bar{cursor:pointer;margin:15px 0;padding:6px;border-radius:8px}.barline{display:flex;justify-content:space-between;gap:12px;font-size:13px}.track{height:11px;background:#2a3952;border-radius:8px;margin-top:6px;overflow:hidden}.fill{height:100%;border-radius:8px}.scroll{overflow:auto}table{width:100%;border-collapse:collapse;white-space:nowrap}th,td{text-align:left;padding:12px 10px;border-bottom:1px solid var(--line)}th{color:var(--muted);font-size:12px}tbody tr{cursor:pointer}.right{text-align:right}.empty{padding:22px;color:var(--muted)}dialog{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:16px;width:min(590px,95vw);max-height:90vh}dialog::backdrop{background:#000a}.form{display:grid;grid-template-columns:1fr 1fr;gap:12px}.modalactions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;margin-top:18px}.detail{display:flex;justify-content:space-between;border-bottom:1px solid var(--line);padding:9px 0;gap:15px}.foot{margin-top:18px;color:var(--muted);font-size:12px}@media(max-width:850px){.filters,.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.charts{grid-template-columns:1fr}}@media(max-width:530px){.wrap{padding:12px}.head h1{font-size:21px}.filters,.kpis,.form{grid-template-columns:1fr}.metric{font-size:22px}}
 [hidden]{display:none!important}.auth-page{min-height:100vh;display:grid;place-items:center;padding:20px}.auth-box{background:var(--panel);border:1px solid var(--line);padding:30px;border-radius:18px;width:min(450px,100%)}.auth-box h1{margin:0 0 5px}.auth-box input{margin:5px 0 12px}.auth-box label{font-size:13px;color:var(--muted)}.auth-switch{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}.auth-error{min-height:24px;color:var(--gold);font-size:13px;margin-top:9px}.user-pill{font-size:12px;color:var(--muted);padding:10px}.busy{opacity:.55;pointer-events:none}
+
+.ocr-dialog{width:min(980px,96vw);max-height:92vh;padding:20px;overflow:auto}
+.ocr-toolbar{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.ocr-toolbar h2{margin:0;font-size:20px}
+.ocr-preview{display:flex;gap:10px;overflow-x:auto;padding:8px 0 16px}
+.ocr-thumb{width:140px;flex:none;display:flex;flex-direction:column;gap:6px;background:var(--bg);padding:6px;border:1px solid var(--line);border-radius:10px;overflow-wrap:anywhere;font-size:11px}
+.ocr-thumb img{width:100%;height:120px;object-fit:contain}
+.ocr-card{background:var(--bg);border:1px solid var(--line);padding:16px;border-radius:12px;margin:14px 0}
+.ocr-card-head{display:flex;gap:10px;justify-content:space-between;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.ocr-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.ocr-grid label,.ocr-full,.ocr-action{display:flex;flex-direction:column;gap:5px;color:var(--muted);font-size:12px}
+.ocr-full,.ocr-action{margin-top:12px}
+.ocr-warning{color:var(--gold);font-size:12px;margin-top:12px}
+.ocr-footer{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;padding:16px 0 0;position:sticky;bottom:-20px;background:var(--panel)}
+.ocr-extracted{margin-top:10px;max-width:100%}
+.ocr-extracted pre{white-space:pre-wrap;word-break:break-word;background:var(--bg);padding:12px;border-radius:8px}
+@media(max-width:600px){.ocr-grid{grid-template-columns:1fr}.ocr-dialog{padding:14px}}
 </style></head><body>
 <section id="authScreen" class="auth-page"><div class="auth-box">
 <h1>↗ Meu Patrimônio <span style="color:var(--teal)">/ BI</span></h1>
@@ -19,7 +36,7 @@
 </div></section>
 <div id="appScreen" hidden>
 <div class="wrap"><header class="head"><div><h1>↗ Meu Patrimônio <span style="color:var(--teal)">/ BI</span></h1><div class="muted">Dashboard pessoal de investimentos</div></div>
-<div class="actions"><span class="user-pill" id="userEmail"></span><button id="logout">Sair</button><button id="import">↑ Importar backup</button><button id="reset">↺ Zerar carteira</button><button id="backup">↓ Backup JSON</button><button id="csv">↓ CSV</button><button class="primary" id="add">+ Adicionar</button></div></header>
+<div class="actions"><span class="user-pill" id="userEmail"></span><button id="logout">Sair</button><button id="import">↑ Importar backup</button><button id="reset">↺ Zerar carteira</button><button id="backup">↓ Backup JSON</button><button id="csv">↓ CSV</button><button id="importImage" title="Ler um print e revisar antes de cadastrar">📷 Importar por imagem</button><button class="primary" id="add">+ Adicionar</button></div></header>
 <div class="notice"><strong>Privacidade:</strong> ao criar sua conta você começa com <strong>R$ 0,00 e nenhum investimento cadastrado</strong>. Os investimentos são salvos no Supabase e protegidos para que somente o titular da conta possa consultá-los. Não compartilhe sua senha. <strong>As cotações não são atualizadas automaticamente.</strong></div>
 <div class="grid filters"><label>Categoria<select id="category"><option value="">Todas</option></select></label><label>Tipo<select id="type"><option value="">Todos</option></select></label><label>Origem<select id="source"><option value="">Todas</option></select></label><label>Buscar ativo<input id="search" placeholder="Ticker, nome, corretora"></label></div>
 <div class="grid kpis" id="kpis"></div>
@@ -27,8 +44,21 @@
 <div class="grid charts"><section class="card"><h2>Resultado informado por ativo</h2><div id="gains"></div></section><section class="card"><h2>Diagnóstico</h2><div id="diagnostics"></div><p class="small muted">Sem histórico de aportes, o painel não representa evolução patrimonial real.</p></section></div>
 <section class="card"><h2>Posições detalhadas</h2><div class="scroll"><table><thead><tr><th>Ativo</th><th>Categoria</th><th>Origem</th><th class="right">Quantidade</th><th class="right">Valor atual</th><th class="right">Resultado</th><th class="right">Participação</th></tr></thead><tbody id="rows"></tbody></table></div></section>
 <div class="foot">Dados sincronizados com sua conta Supabase. Mantenha backups periódicos. Esta página não oferece aconselhamento financeiro.</div>
-</div></div><input type="file" id="file" accept=".json,application/json" hidden><dialog id="dlg"><div id="dialogcontent"></div></dialog>
+</div></div>
+<input type="file" id="imageFile" accept="image/png,image/jpeg,image/webp" multiple hidden>
+<dialog id="imageDlg" class="ocr-dialog" aria-labelledby="imageImportTitle">
+  <div class="ocr-toolbar"><h2 id="imageImportTitle">📷 Importar investimento pela imagem</h2><button type="button" id="closeImageImport">Fechar</button></div>
+  <p class="small muted">Envie um print da corretora ou banco. A leitura automática acontece no navegador, sem enviar a foto ao Supabase. Os números podem ser lidos incorretamente; revise tudo antes de salvar. Fotos não são arquivadas.</p>
+  <div id="imagePreview" class="ocr-preview"></div>
+  <p id="imageStatus" role="status" aria-live="polite" style="color:var(--gold)"></p>
+  <div id="imageCandidates"></div>
+  <button type="button" id="addImageManual">+ Adicionar linha manual</button>
+  <div id="ocrDetails" class="ocr-extracted"></div>
+  <div class="ocr-footer"><button type="button" id="saveImageImport" class="primary">Confirmar e salvar no Supabase</button></div>
+</dialog>
+<input type="file" id="file" accept=".json,application/json" hidden><dialog id="dlg"><div id="dialogcontent"></div></dialog>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.0/dist/umd/supabase.min.js"></script>
+<script src="./ocr-import.js"></script>
 <script>
 (function(){
 "use strict";
@@ -103,6 +133,12 @@ el("file").onchange=async function(e){var f=e.target.files[0];if(!f)return;
 try{var obj=JSON.parse(await f.text()),arr=Array.isArray(obj)?obj:obj.assets;if(!Array.isArray(arr)||arr.some(function(a){return typeof a.ticker!=="string"||!isFinite(Number(a.value))||Number(a.value)<0}))throw Error("Arquivo inválido");
 if(!confirm("Adicionar "+arr.length+" posições à SUA conta? Os registros existentes serão mantidos."))return;
 var items=arr.map(function(a){return payload(a)});for(var i=0;i<items.length;i+=100){var res=await sb.from("investment_positions").insert(items.slice(i,i+100));if(res.error)throw res.error}await loadPositions();alert("Importação concluída.")}catch(err){notifyError(err)}finally{e.target.value=""}};
+if(window.InvestmentImageImport){window.InvestmentImageImport.attach({
+  db:sb,
+  getUser:function(){return user;},
+  getPositions:function(){return data;},
+  refresh:loadPositions
+});}
 function authMessage(msg){el("authMessage").textContent=msg||""}
 function showAuth(){el("appScreen").hidden=true;el("authScreen").hidden=false;el("authPass").value="";authMessage("");setMode("login")}
 function showApp(){el("authScreen").hidden=true;el("appScreen").hidden=false;el("userEmail").textContent=user.email||"Minha conta";render()}
