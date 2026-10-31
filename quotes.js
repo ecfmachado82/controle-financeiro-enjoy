@@ -119,7 +119,7 @@ function renderQuote(data){
  const more=document.createElement("span");more.textContent=" • Referência: "+dateLabel(data.reference)+" • "+(data.delay||"");src.appendChild(more);
  const explain=$("explain");explain.replaceChildren();
  const title=document.createElement("p");
- title.textContent=data.isClosingPrice?"Este valor é o preço oficial de fechamento do último pregão disponível, e não uma cotação em tempo real.":"Este é o preço negociado no mercado Spot da Binance para o par em reais, no momento da consulta.";
+ title.textContent=data.isClosingPrice?"Este preço de fechamento foi informado por um agregador de cotações da B3; pode haver atraso ou divergência e não representa preço em tempo real.":"Este é o preço negociado no mercado Spot da Binance para o par em reais, no momento da consulta.";
  explain.appendChild(title);
  const q=document.createElement("p");
  q.innerHTML=data.isClosingPrice?"<strong>Variação do dia</strong> compara fechamentos de pregões. Fim de semana e feriados usam o pregão mais recente.":"<strong>Variação de 24h</strong> reflete uma janela móvel de negociação, diferente da variação diária de ações.";
