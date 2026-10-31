@@ -114,7 +114,7 @@ try{
  else if(authMode==="reset"){var r=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin});if(r.error)throw r.error;authMessage("Se o e-mail estiver cadastrado, você receberá instruções para recuperar a senha.");}
  else{var r=await sb.auth.signInWithPassword({email,password});if(r.error)throw r.error;}
 }catch(err){authMessage(err.message||"Não foi possível concluir a operação.")}finally{button.disabled=false}};
-async function sessionUpdate(nextUser){if(recoveryMode)return;if((user&&nextUser&&user.id===nextUser.id)||(!user&&!nextUser))return;user=nextUser;data=[];if(!user){showAuth();return}showApp();try{await loadPositions()}catch(err){notifyError(err)}}
+async function sessionUpdate(nextUser){if(recoveryMode)return;if((user&&nextUser&&user.id===nextUser.id)||(!user&&!nextUser))return;user=nextUser;data=[];if(!user){showAuth();return}showApp();try{var profile=await sb.from("investment_profiles").upsert({user_id:user.id,display_name:String(user.user_metadata&&user.user_metadata.display_name||"").slice(0,120)},{onConflict:"user_id",ignoreDuplicates:true});if(profile.error)throw profile.error;await loadPositions()}catch(err){notifyError(err)}}
 sb.auth.onAuthStateChange(function(event,session){if(event==="PASSWORD_RECOVERY"){recoveryMode=true;user=null;data=[];el("appScreen").hidden=true;el("authScreen").hidden=false;setMode("newpassword");authMessage("Escolha sua nova senha para concluir a recuperação.");return}setTimeout(function(){sessionUpdate(session&&session.user||null)},0)});
 (async function(){try{var r=await sb.auth.getUser();if(r.error&&r.error.name!=="AuthSessionMissingError")throw r.error;await sessionUpdate(r.data.user||null)}catch(err){showAuth();authMessage(err.message||"Falha ao carregar sessão.")}})();
 
