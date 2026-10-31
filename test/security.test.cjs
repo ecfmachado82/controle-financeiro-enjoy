@@ -27,7 +27,7 @@ test("backup inválido ou excessivo é rejeitado",()=>{
 test("CSV neutraliza fórmulas e mantém números válidos",()=>{
  for(const hostile of ["=HYPERLINK(\"bad\")","+SUM(1,1)","-1+2","@SUM(3)"," \t=calc","\r\n=1+1"]){
   const out=Sec.safeCsvCell(hostile,true);
-  assert.ok(out.startsWith('"\'"),"Fórmula não neutralizada: "+hostile);
+  assert.ok(out.startsWith("\"'"),"Fórmula não neutralizada: "+hostile);
  }
  assert.equal(Sec.safeCsvCell(-12.7,false),'"-12.7"');
  assert.equal(Sec.safeCsvCell("XPTO",true),'"XPTO"');
