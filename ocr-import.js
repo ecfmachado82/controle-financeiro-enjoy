@@ -28,7 +28,7 @@ function parseImageText(text,filename){
      var ticker=m[0].toUpperCase().replace(/\s/g,"");
      if(/^(CDB|LCI|LCA|TESOURO)$/.test(ticker)&&!new RegExp("^"+ticker+"\\b","i").test(line))continue;
      if(/^(USDT|USDC)$/.test(ticker)&&!new RegExp("^"+ticker+"\\b","i").test(line))continue;
-     if(!hits.some(function(h){return h.i===i&&h.ticker===ticker;}))hits.push({i:i,ticker:ticker});
+     if(!hits.some(function(h){return h.ticker===ticker&&i>=h.i&&i-h.i<=2;}))hits.push({i:i,ticker:ticker});
    }
  });
  hits.sort(function(a,b){return a.i-b.i});
