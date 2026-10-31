@@ -1,18 +1,21 @@
-# Cotações no BI
+# Cotações do Controle Financeiro Enjoy
 
-## Fontes
-- **Ações e FIIs brasileiros**: [brapi](https://brapi.dev/). Para ampliar cobertura, cadastre `BRAPI_TOKEN` como variável **encrypted** no projeto Vercel, ambiente Production, e publique novamente. Não coloque a chave no HTML nem no repositório.
-- **Criptomoedas**: endpoint público Binance Spot, par com BRL (ex.: BTCBRL). Outros pares podem não estar disponíveis.
-- **CDB, LCI/LCA e Tesouro**: não há cotação automática nessa fase. O painel indica indisponibilidade, sem inventar valores.
+## Fontes gratuitas atuais
 
-## Como funciona
-- O endpoint `/api/market?tickers=...` pesquisa até 20 ativos por solicitação, usando funções serverless Vercel e cache intermediário.
-- A seção Mercado e rentabilidade carrega quando você entra na conta ou salva seus investimentos; o botão **Atualizar preços** consulta novamente.
-- **Variação dia/24h** é a mudança reportada pelo provedor, não o ganho da sua carteira.
-- **Resultado total indicativo** = quantidade × cotação atual − quantidade × preço médio de compra + proventos recebidos. Não considera taxas, tributos nem compras/vendas históricas.
-- O campo **Valor atual** da posição cadastrado pelo cliente não é substituído automaticamente: isso evita perdas de dados quando a API estiver fora ou atrasada.
-- Não se deve tratar cotações gratuitas como dados em tempo real, nem usar o painel como executor de ordens.
+- **Ações e FIIs brasileiros**: Capital Agora (api/ativo e api/sugerir). Dados do **último fechamento disponível** da B3; pode haver atraso e indisponibilidade.
+- **Criptomoedas**: Binance Spot, pares em BRL disponíveis (como BTCBRL). Variação móvel de 24h, não variação de pregão.
+- **Histórico e gráficos**: TradingView incorporada apenas na página pública de consulta.
+- **CDB, LCI/LCA e Tesouro**: sem atualização automática de rentabilidade nesta fase. O preço atual deverá ser informado pelo usuário; não supor taxa.
 
-## Segurança
-- O endpoint recebe somente códigos públicos, sem quantidade ou identificação de conta.
-- Nunca coloque chave de serviço Supabase nem chave secreta brapi no navegador.
+## Funcionamento
+- A página `/cotacoes.html` pesquisa o mercado sem login e apresenta fonte e data de referência.
+- A API `/api/market` aceita até 20 códigos por consulta, mas não recebe quantidades ou saldos do usuário.
+- A Vercel executa as APIs e aplica WAF com limite de frequência. Dados recebidos de terceiros são informativos.
+- A seção da carteira apenas calcula valores indicativos: quantidade × preço cotado e rentabilidade usando preço médio de compra e proventos informados.
+- A consulta **não sobrescreve** os registros salvos no Supabase.
+
+## Segurança e precisão
+- Os dados da carteira são protegidos por RLS e não são enviados aos provedores de cotações.
+- O servidor valida formato e tamanho do código; usa provedores fixos, sem URLs arbitrárias.
+- Fontes gratuitas não garantem tempo real nem completude, e não são adequadas à execução automática de ordens.
+- Se uma cotação não estiver disponível, o painel mostra indisponibilidade, não inventa o valor.
