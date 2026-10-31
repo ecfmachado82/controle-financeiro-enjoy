@@ -103,7 +103,7 @@ el("reset").onclick=async function(){
    el("resetConfirmation").value="";
    alert("Carteira zerada no Supabase.");
  }catch(err){
-   el("settingsStatus").textContent="Falha ao excluir: "+(err.message||String(err))+". Confira os investimentos antes de tentar novamente.";
+   el("settingsStatus").textContent="Não foi possível concluir a exclusão. Confira sua carteira e tente novamente.";
    try{await loadPositions()}catch(_){}
  }finally{
    el("settingsClose").disabled=false;
