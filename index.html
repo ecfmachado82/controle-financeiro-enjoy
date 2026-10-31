@@ -22,7 +22,7 @@
 .ocr-extracted{margin-top:10px;max-width:100%}
 .ocr-extracted pre{white-space:pre-wrap;word-break:break-word;background:var(--bg);padding:12px;border-radius:8px}
 @media(max-width:600px){.ocr-grid{grid-template-columns:1fr}.ocr-dialog{padding:14px}}
-.market-head{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}.market-head h2{margin:0}.market-head p{margin:4px 0}.market-head button{margin-right:10px}#marketPanel tr[data-market]{cursor:pointer}#marketPanel tr[data-market]:hover{background:#21324c}</style></head><body>
+.more-wrapper{position:relative}.more-menu{position:absolute;top:calc(100% + 8px);right:0;z-index:25;width:min(295px,calc(100vw - 32px));background:#172840;border:1px solid #39536f;border-radius:12px;padding:7px;box-shadow:0 18px 40px #0009}.more-menu button{display:block;width:100%;text-align:left;border:0;background:transparent;padding:12px;border-radius:8px}.more-menu button:hover,.more-menu button:focus-visible{background:#29415d}.more-menu hr{border:0;border-top:1px solid var(--line);margin:7px}.action-link{display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:10px;padding:10px 14px;text-decoration:none;color:var(--text);background:#21314b;white-space:nowrap}.action-link:hover{background:#29415d}.actions{align-items:center;justify-content:flex-end}.actions>button{white-space:nowrap}.user-info{display:block;color:var(--muted);font-size:12px;margin-top:5px;overflow-wrap:anywhere}.settings-dialog{max-width:520px;padding:24px}.settings-dialog h2{margin:0 0 6px}.danger-zone{border:1px solid #9b4559;border-radius:13px;background:#32202c;padding:15px;margin-top:18px}.danger-zone h3{margin:0;color:#ffb8be;font-size:16px}.danger-zone p{margin:9px 0;color:#f3d9df;font-size:13px}.danger-zone label{display:block;font-size:13px;margin-top:14px}.danger-button{background:#8d2944;border-color:#bc4f67;color:#fff}.danger-button:disabled{opacity:.4;cursor:not-allowed}.settings-error{color:var(--gold);min-height:18px;font-size:13px;margin-top:9px}@media(max-width:680px){.head{align-items:stretch}.actions{justify-content:stretch}.actions>button,.actions>.action-link,.more-wrapper{flex:1 1 145px;text-align:center}.more-wrapper>button{width:100%}}.market-head{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}.market-head h2{margin:0}.market-head p{margin:4px 0}.market-head button{margin-right:10px}#marketPanel tr[data-market]{cursor:pointer}#marketPanel tr[data-market]:hover{background:#21324c}</style></head><body>
 <section id="authScreen" class="auth-page"><div class="auth-box">
 <h1>↗ Meu Patrimônio <span style="color:var(--teal)">/ BI</span></h1>
 <p class="muted">Acesse sua carteira pessoal protegida.</p><p><a href="/cotacoes.html" style="display:inline-block;border:1px solid var(--teal);color:var(--teal);padding:11px 14px;border-radius:10px;text-decoration:none;font-weight:700">🔎 Pesquisar cotações sem cadastro</a></p><p class="small muted">A consulta de mercado é pública e não exige conta.</p>
@@ -35,9 +35,29 @@
 <p class="small muted">Cada conta possui uma carteira independente. Suas posições ficam armazenadas no Supabase e podem ser acessadas em outros dispositivos.</p>
 </div></section>
 <div id="appScreen" hidden>
-<div class="wrap"><header class="head"><div><h1>↗ Meu Patrimônio <span style="color:var(--teal)">/ BI</span></h1><div class="muted">Dashboard pessoal de investimentos</div></div>
-<div class="actions"><a href="/cotacoes.html" style="display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:10px;padding:10px 14px;color:var(--teal);text-decoration:none">🔎 Consultar cotações</a><span class="user-pill" id="userEmail"></span><button id="logout">Sair</button><button id="import">↑ Importar backup</button><button id="reset">↺ Zerar carteira</button><button id="backup">↓ Backup JSON</button><button id="csv">↓ CSV</button><button id="importImage" title="Ler um print e revisar antes de cadastrar">📷 Importar por imagem</button><button class="primary" id="add">+ Adicionar</button></div></header>
-<div class="notice"><strong>Privacidade:</strong> ao criar sua conta você começa com <strong>R$ 0,00 e nenhum investimento cadastrado</strong>. Os investimentos são salvos no Supabase e protegidos para que somente o titular da conta possa consultá-los. Não compartilhe sua senha. <strong>As cotações não são atualizadas automaticamente.</strong></div>
+<div class="wrap"><header class="head">
+<div>
+  <h1>↗ Meu Patrimônio <span style="color:var(--teal)">/ BI</span></h1>
+  <div class="muted">Dashboard pessoal de investimentos</div>
+  <span class="user-info" id="userEmail"></span>
+</div>
+<div class="actions" aria-label="Ações da carteira">
+  <button type="button" class="primary" id="add">+ Adicionar investimento</button>
+  <button type="button" id="importImage" title="Ler uma foto ou print e revisar antes de cadastrar">📷 Importar por imagem</button>
+  <a class="action-link" href="/cotacoes.html">🔎 Pesquisar cotação</a>
+  <div class="more-wrapper" id="moreWrapper">
+    <button type="button" id="moreToggle" aria-haspopup="true" aria-expanded="false" aria-controls="moreMenu">⋯ Mais opções ▾</button>
+    <div class="more-menu" id="moreMenu" role="menu" aria-label="Mais opções da carteira" hidden>
+      <button type="button" id="csv" role="menuitem">📊 Exportar Excel/CSV</button>
+      <button type="button" id="backup" role="menuitem">↓ Fazer backup JSON</button>
+      <button type="button" id="import" role="menuitem">↑ Importar backup</button>
+      <hr role="separator">
+      <button type="button" id="settings" role="menuitem">⚙ Configurações</button>
+      <button type="button" id="logout" role="menuitem">↪ Sair da conta</button>
+    </div>
+  </div>
+</div></header>
+<div class="notice"><strong>Privacidade:</strong> ao criar sua conta você começa com <strong>R$ 0,00 e nenhum investimento cadastrado</strong>. Os investimentos são salvos no Supabase e protegidos para que somente o titular da conta possa consultá-los. Não compartilhe sua senha. <strong>As cotações de mercado são consultadas separadamente, sem sobrescrever seus cadastros.</strong></div>
 <div class="grid filters"><label>Categoria<select id="category"><option value="">Todas</option></select></label><label>Tipo<select id="type"><option value="">Todos</option></select></label><label>Origem<select id="source"><option value="">Todas</option></select></label><label>Buscar ativo<input id="search" placeholder="Ticker, nome, corretora"></label></div>
 <div class="grid kpis" id="kpis"></div>
 <div class="grid charts"><section class="card"><h2>Distribuição por categoria</h2><div class="small muted">Clique na legenda para detalhar</div><div class="donutrow"><div class="donut" id="donut"><div class="hole" id="donutcenter"></div></div><div class="legend" id="legend"></div></div></section><section class="card"><h2>Posições por investimento</h2><div class="small muted">Clique nas barras para abrir os detalhes (drill-down)</div><div id="bars"></div></section></div>
@@ -45,6 +65,25 @@
 <section class="card" id="marketPanel"><h2>Mercado e rentabilidade</h2><p class="muted">Aguardando consulta de cotações.</p></section><section class="card"><h2>Posições detalhadas</h2><div class="scroll"><table><thead><tr><th>Ativo</th><th>Categoria</th><th>Origem</th><th class="right">Quantidade</th><th class="right">Valor atual</th><th class="right">Resultado</th><th class="right">Participação</th></tr></thead><tbody id="rows"></tbody></table></div></section>
 <div class="foot">Dados sincronizados com sua conta Supabase. Mantenha backups periódicos. Esta página não oferece aconselhamento financeiro.</div>
 </div></div>
+<dialog id="settingsDlg" class="settings-dialog" aria-labelledby="settingsTitle">
+<h2 id="settingsTitle">⚙ Configurações da carteira</h2>
+<p class="small muted">Gerencie sua carteira com segurança. Os dados são salvos na sua conta Supabase.</p>
+<div class="detail"><span>Conta</span><strong id="settingsAccount"></strong></div>
+<section class="danger-zone">
+<h3>Zona de perigo</h3>
+<p><strong>Zerar carteira:</strong> exclui permanentemente todos os investimentos cadastrados na sua conta.</p>
+<p>Não exclui sua conta, mas a exclusão dos investimentos não pode ser desfeita. Faça o backup antes, se precisar.</p>
+<p id="settingsCount"></p>
+<label for="resetConfirmation">Para confirmar, digite exatamente <strong>ZERAR</strong>:</label>
+<input id="resetConfirmation" type="text" placeholder="ZERAR" autocomplete="off" spellcheck="false">
+<p class="small" id="resetHelp">O botão de exclusão só será habilitado depois de digitar a palavra.</p>
+<p id="settingsStatus" class="settings-error" role="status" aria-live="polite"></p>
+</section>
+<div class="modalactions">
+<button type="button" id="settingsClose">Fechar</button>
+<button type="button" id="reset" class="danger-button" disabled>Excluir todos os investimentos</button>
+</div>
+</dialog>
 <input type="file" id="imageFile" accept="image/png,image/jpeg,image/webp" multiple hidden>
 <dialog id="imageDlg" class="ocr-dialog" aria-labelledby="imageImportTitle">
   <div class="ocr-toolbar"><h2 id="imageImportTitle">📷 Importar investimento pela imagem</h2><button type="button" id="closeImageImport">Fechar</button></div>
@@ -124,11 +163,56 @@ el("search").oninput=function(e){filters.search=e.target.value;render();el("sear
 
 if(window.MarketPanel)window.MarketPanel.attach({getUser:function(){return user},getPositions:function(){return data}});
 el("add").onclick=function(){if(user)edit()};
+function toggleMoreMenu(open){
+ el("moreMenu").hidden=!open;
+ el("moreToggle").setAttribute("aria-expanded",String(open));
+}
+el("moreToggle").onclick=function(){toggleMoreMenu(el("moreMenu").hidden)};
+document.addEventListener("click",function(ev){if(!el("moreWrapper").contains(ev.target))toggleMoreMenu(false)});
+document.addEventListener("keydown",function(ev){if(ev.key==="Escape"&&!el("moreMenu").hidden){toggleMoreMenu(false);el("moreToggle").focus()}});
+el("moreMenu").addEventListener("click",function(ev){if(ev.target.closest("button"))toggleMoreMenu(false)});
+el("settings").onclick=function(){
+ if(!user)return;
+ el("settingsAccount").textContent=user.email||"Conta autenticada";
+ el("settingsCount").textContent=data.length+" posição(ões) cadastrada(s) serão excluídas.";
+ el("resetConfirmation").value="";
+ el("settingsStatus").textContent="";
+ el("reset").disabled=true;
+ el("settingsDlg").showModal();
+};
+el("settingsClose").onclick=function(){el("settingsDlg").close()};
+el("resetConfirmation").oninput=function(){
+ el("reset").disabled=el("resetConfirmation").value!=="ZERAR";
+ el("settingsStatus").textContent="";
+};
 el("logout").onclick=async function(){var r=await sb.auth.signOut();if(r.error)notifyError(r.error);else{user=null;data=[];if(window.MarketPanel)window.MarketPanel.clear();showAuth()}};
-el("reset").onclick=async function(){if(!user)return;if(!data.length){alert("A carteira já está vazia.");return}if(!confirm("EXCLUIR permanentemente TODOS os investimentos desta conta? Recomendamos fazer backup em JSON antes."))return;
-try{var res=await sb.from("investment_positions").delete().eq("user_id",user.id);if(res.error)throw res.error;filters={category:"",type:"",source:"",search:""};await loadPositions();alert("Carteira zerada no Supabase.")}catch(e){notifyError(e)}};
+el("reset").onclick=async function(){
+ if(!user||!el("settingsDlg").open||el("resetConfirmation").value!=="ZERAR")return;
+ if(!data.length){el("settingsStatus").textContent="Sua carteira já está vazia.";return;}
+ if(!confirm("CONFIRMAÇÃO FINAL: excluir permanentemente TODAS as posições desta conta? Essa operação não pode ser desfeita."))return;
+ var uid=user.id;
+ el("reset").disabled=true;
+ el("settingsClose").disabled=true;
+ el("settingsStatus").textContent="Excluindo investimentos...";
+ try{
+   var res=await sb.from("investment_positions").delete().eq("user_id",uid).select("id");
+   if(res.error)throw res.error;
+   if(!user||user.id!==uid)throw Error("A sessão mudou durante a operação.");
+   filters={category:"",type:"",source:"",search:""};
+   await loadPositions();
+   el("settingsDlg").close();
+   el("resetConfirmation").value="";
+   alert("Carteira zerada no Supabase.");
+ }catch(err){
+   el("settingsStatus").textContent="Falha ao excluir: "+(err.message||String(err))+". Confira os investimentos antes de tentar novamente.";
+   try{await loadPositions()}catch(_){}
+ }finally{
+   el("settingsClose").disabled=false;
+   el("reset").disabled=el("resetConfirmation").value!=="ZERAR";
+ }
+};
 el("backup").onclick=function(){download("backup_investimentos.json",JSON.stringify({version:2,exportedAt:new Date().toISOString(),assets:data},null,2),"application/json")};
-el("csv").onclick=function(){var keys=["ticker","name","category","type","source","qty","price","value","gain","notes"];download("carteira.csv","\ufeff"+keys.join(";")+"\r\n"+selection().map(function(a){return keys.map(function(k){return '"'+String(a[k]??"").replace(/"/g,'""')+'"'}).join(";")}).join("\r\n"),"text/csv;charset=utf-8")};
+el("csv").onclick=function(){var keys=["ticker","name","category","type","source","qty","purchase_price","price","value","gain","dividends_received","notes"];download("carteira.csv","\ufeff"+keys.join(";")+"\r\n"+selection().map(function(a){return keys.map(function(k){return '"'+String(a[k]??"").replace(/"/g,'""')+'"'}).join(";")}).join("\r\n"),"text/csv;charset=utf-8")};
 el("import").onclick=function(){if(user)el("file").click()};
 el("file").onchange=async function(e){var f=e.target.files[0];if(!f)return;
 try{var obj=JSON.parse(await f.text()),arr=Array.isArray(obj)?obj:obj.assets;if(!Array.isArray(arr)||arr.some(function(a){return typeof a.ticker!=="string"||!isFinite(Number(a.value))||Number(a.value)<0}))throw Error("Arquivo inválido");
