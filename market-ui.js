@@ -47,7 +47,7 @@ async function refresh(){
  finally{busy=false;render();}
 }
 window.MarketPanel={
- attach:function(input){api=input;render();},
+ attach:function(input){api=input;render();setInterval(function(){if(api.getUser()&&document.visibilityState==="visible")refresh();},300000);},
  refresh:refresh,
  clear:function(){cached=[];selected=null;timestamp="";render();}
 };
