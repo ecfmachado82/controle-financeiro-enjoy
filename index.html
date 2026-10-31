@@ -22,7 +22,7 @@
 .ocr-extracted{margin-top:10px;max-width:100%}
 .ocr-extracted pre{white-space:pre-wrap;word-break:break-word;background:var(--bg);padding:12px;border-radius:8px}
 @media(max-width:600px){.ocr-grid{grid-template-columns:1fr}.ocr-dialog{padding:14px}}
-</style></head><body>
+.market-head{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}.market-head h2{margin:0}.market-head p{margin:4px 0}.market-head button{margin-right:10px}#marketPanel tr[data-market]{cursor:pointer}#marketPanel tr[data-market]:hover{background:#21324c}</style></head><body>
 <section id="authScreen" class="auth-page"><div class="auth-box">
 <h1>↗ Meu Patrimônio <span style="color:var(--teal)">/ BI</span></h1>
 <p class="muted">Acesse sua carteira pessoal protegida.</p>
@@ -42,7 +42,7 @@
 <div class="grid kpis" id="kpis"></div>
 <div class="grid charts"><section class="card"><h2>Distribuição por categoria</h2><div class="small muted">Clique na legenda para detalhar</div><div class="donutrow"><div class="donut" id="donut"><div class="hole" id="donutcenter"></div></div><div class="legend" id="legend"></div></div></section><section class="card"><h2>Posições por investimento</h2><div class="small muted">Clique nas barras para abrir os detalhes (drill-down)</div><div id="bars"></div></section></div>
 <div class="grid charts"><section class="card"><h2>Resultado informado por ativo</h2><div id="gains"></div></section><section class="card"><h2>Diagnóstico</h2><div id="diagnostics"></div><p class="small muted">Sem histórico de aportes, o painel não representa evolução patrimonial real.</p></section></div>
-<section class="card"><h2>Posições detalhadas</h2><div class="scroll"><table><thead><tr><th>Ativo</th><th>Categoria</th><th>Origem</th><th class="right">Quantidade</th><th class="right">Valor atual</th><th class="right">Resultado</th><th class="right">Participação</th></tr></thead><tbody id="rows"></tbody></table></div></section>
+<section class="card" id="marketPanel"><h2>Mercado e rentabilidade</h2><p class="muted">Aguardando consulta de cotações.</p></section><section class="card"><h2>Posições detalhadas</h2><div class="scroll"><table><thead><tr><th>Ativo</th><th>Categoria</th><th>Origem</th><th class="right">Quantidade</th><th class="right">Valor atual</th><th class="right">Resultado</th><th class="right">Participação</th></tr></thead><tbody id="rows"></tbody></table></div></section>
 <div class="foot">Dados sincronizados com sua conta Supabase. Mantenha backups periódicos. Esta página não oferece aconselhamento financeiro.</div>
 </div></div>
 <input type="file" id="imageFile" accept="image/png,image/jpeg,image/webp" multiple hidden>
@@ -58,7 +58,7 @@
 </dialog>
 <input type="file" id="file" accept=".json,application/json" hidden><dialog id="dlg"><div id="dialogcontent"></div></dialog>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.0/dist/umd/supabase.min.js"></script>
-<script src="./ocr-import.js"></script>
+<script src="./ocr-import.js"></script><script src="./market-ui.js"></script>
 <script>
 (function(){
 "use strict";
@@ -77,14 +77,14 @@ var total=function(xs){return xs.reduce(function(sum,x){return sum+(Number(x.val
 var selection=function(){return data.filter(function(x){return (!filters.category||x.category===filters.category)&&(!filters.type||x.type===filters.type)&&(!filters.source||x.source===filters.source)&&(!filters.search||(String(x.ticker)+" "+x.name+" "+x.source).toLowerCase().includes(filters.search.toLowerCase()))})};
 async function loadPositions(){
  if(!user)return; var uid=user.id;
- var result=await sb.from("investment_positions").select("id,ticker,name,category,type,source,qty,price,value,gain,notes").eq("user_id",uid).order("created_at",{ascending:true});
+ var result=await sb.from("investment_positions").select("id,ticker,name,category,type,source,qty,price,value,gain,notes,purchase_price,dividends_received").eq("user_id",uid).order("created_at",{ascending:true});
  if(result.error)throw result.error;
  if(!user||user.id!==uid)return;
- data=result.data||[];render();
+ data=result.data||[];render();if(window.MarketPanel)window.MarketPanel.refresh();
 }
 function notifyError(e){alert("Falha na sincronização: "+(e&&e.message?e.message:String(e))+". Nenhuma alteração local foi considerada salva.")}
 async function refresh(){try{await loadPositions()}catch(e){notifyError(e)}}
-function payload(a){return {user_id:user.id,ticker:a.ticker,name:a.name||"",category:a.category||"Outros",type:a.type||"",source:a.source||"",qty:a.qty??0,price:a.price,value:a.value??0,gain:a.gain,notes:a.notes||""}}
+function payload(a){return {user_id:user.id,ticker:a.ticker,name:a.name||"",category:a.category||"Outros",type:a.type||"",source:a.source||"",qty:a.qty??0,price:a.price,value:a.value??0,gain:a.gain,notes:a.notes||"",purchase_price:a.purchase_price??null,dividends_received:a.dividends_received??0}}
 function selectOptions(id){var vals=[...new Set(data.map(function(a){return a[id]}).filter(Boolean))].sort();el(id).innerHTML='<option value="">Todas</option>'+vals.map(function(v){return '<option value="'+escapeHTML(v)+'">'+escapeHTML(v)+'</option>'}).join("");el(id).value=filters[id]}
 function render(){
 ["category","type","source"].forEach(selectOptions);el("search").value=filters.search;
@@ -109,11 +109,11 @@ function close(){el("dlg").close()}
 function detail(id){var a=data.find(function(x){return x.id===id});if(!a)return;
 el("dialogcontent").innerHTML='<h2>'+escapeHTML(a.ticker)+'</h2><div class="muted">'+escapeHTML(a.name)+'</div><h1>'+money(a.value)+'</h1>'+Object.entries({"Categoria":a.category,"Tipo":a.type,"Origem":a.source,"Quantidade":number(a.qty),"Preço de referência":money(a.price),"Resultado informado":money(a.gain),"Observações":a.notes||"—"}).map(function(x){return '<div class="detail"><span>'+x[0]+'</span><b>'+escapeHTML(x[1])+'</b></div>'}).join("")+'<div class="modalactions"><button id="close">Fechar</button><button class="primary" id="edit">Editar posição</button></div>';
 el("dlg").showModal();el("close").onclick=close;el("edit").onclick=function(){close();edit(id)}}
-function edit(id){if(!user)return;var old=data.find(function(x){return x.id===id})||{},fields=[["ticker","Código"],["name","Nome"],["category","Categoria"],["type","Tipo"],["source","Origem"],["qty","Quantidade"],["price","Preço de referência (R$)"],["value","Valor atual (R$)"],["gain","Resultado (R$)"],["notes","Observações"]];
-el("dialogcontent").innerHTML='<h2>'+(id?"Editar investimento":"Adicionar investimento")+'</h2><form id="form"><div class="form">'+fields.map(function(f){var k=f[0];if(k==="category")return '<label>Categoria<select name="category" required><option value="">Selecione</option>'+["Renda fixa","Ações","Fundos imobiliários","Criptomoedas","Outros"].map(function(c){return '<option value="'+c+'" '+(old.category===c?"selected":"")+'>'+c+'</option>'}).join("")+'</select></label>';return '<label>'+f[1]+'<input name="'+k+'" value="'+escapeHTML(old[k]??"")+'" '+(["qty","price","value","gain"].includes(k)?'type="number" step="any" min="'+(k==="gain"?"-999999999999":"0")+'"':'type="text"')+' '+(["ticker","value"].includes(k)?"required":"")+'></label>'}).join("")+'</div><div class="modalactions"><button type="button" id="cancel">Cancelar</button>'+(id?'<button type="button" id="remove">Excluir</button>':"")+'<button class="primary" type="submit" id="positionSave">Salvar</button></div></form>';
+function edit(id){if(!user)return;var old=data.find(function(x){return x.id===id})||{},fields=[["ticker","Código"],["name","Nome"],["category","Categoria"],["type","Tipo"],["source","Origem"],["qty","Quantidade"],["price","Preço de referência (R$)"],["value","Valor atual (R$)"],["gain","Resultado (R$)"],["notes","Observações"],["purchase_price","Preço médio de compra (R$)"],["dividends_received","Proventos recebidos (R$)"]];
+el("dialogcontent").innerHTML='<h2>'+(id?"Editar investimento":"Adicionar investimento")+'</h2><form id="form"><div class="form">'+fields.map(function(f){var k=f[0];if(k==="category")return '<label>Categoria<select name="category" required><option value="">Selecione</option>'+["Renda fixa","Ações","Fundos imobiliários","Criptomoedas","Outros"].map(function(c){return '<option value="'+c+'" '+(old.category===c?"selected":"")+'>'+c+'</option>'}).join("")+'</select></label>';return '<label>'+f[1]+'<input name="'+k+'" value="'+escapeHTML(old[k]??"")+'" '+(["qty","price","value","gain","purchase_price","dividends_received"].includes(k)?'type="number" step="any" min="'+(k==="gain"?"-999999999999":"0")+'"':'type="text"')+' '+(["ticker","value"].includes(k)?"required":"")+'></label>'}).join("")+'</div><div class="modalactions"><button type="button" id="cancel">Cancelar</button>'+(id?'<button type="button" id="remove">Excluir</button>':"")+'<button class="primary" type="submit" id="positionSave">Salvar</button></div></form>';
 el("dlg").showModal();el("cancel").onclick=close;
 if(id)el("remove").onclick=async function(){if(!confirm("Excluir este investimento da sua conta?"))return;el("form").classList.add("busy");try{var res=await sb.from("investment_positions").delete().eq("id",id).eq("user_id",user.id);if(res.error)throw res.error;close();await loadPositions()}catch(e){notifyError(e)}finally{el("form").classList.remove("busy")}};
-el("form").onsubmit=async function(e){e.preventDefault();var f=new FormData(e.target),o={};fields.forEach(function(z){var v=f.get(z[0]);o[z[0]]=["qty","price","value","gain"].includes(z[0])?(v===""?null:Number(v)):String(v||"")});if(!o.ticker||!Number.isFinite(o.value)||o.value<0||!o.category){alert("Informe código, categoria e valor válido.");return}
+el("form").onsubmit=async function(e){e.preventDefault();var f=new FormData(e.target),o={};fields.forEach(function(z){var v=f.get(z[0]);o[z[0]]=["qty","price","value","gain","purchase_price","dividends_received"].includes(z[0])?(v===""?null:Number(v)):String(v||"")});if(!o.ticker||!Number.isFinite(o.value)||o.value<0||!o.category){alert("Informe código, categoria e valor válido.");return}
 el("form").classList.add("busy");
 try{var q=id?sb.from("investment_positions").update(payload(o)).eq("id",id).eq("user_id",user.id):sb.from("investment_positions").insert(payload(o));var res=await q;if(res.error)throw res.error;close();await loadPositions()}catch(err){notifyError(err)}finally{el("form").classList.remove("busy")}
 }
@@ -122,8 +122,9 @@ function download(name,str,mime){var url=URL.createObjectURL(new Blob([str],{typ
 ["category","type","source"].forEach(function(k){el(k).onchange=function(e){filters[k]=e.target.value;render()}});
 el("search").oninput=function(e){filters.search=e.target.value;render();el("search").focus()};
 
+if(window.MarketPanel)window.MarketPanel.attach({getUser:function(){return user},getPositions:function(){return data}});
 el("add").onclick=function(){if(user)edit()};
-el("logout").onclick=async function(){var r=await sb.auth.signOut();if(r.error)notifyError(r.error);else{user=null;data=[];showAuth()}};
+el("logout").onclick=async function(){var r=await sb.auth.signOut();if(r.error)notifyError(r.error);else{user=null;data=[];if(window.MarketPanel)window.MarketPanel.clear();showAuth()}};
 el("reset").onclick=async function(){if(!user)return;if(!data.length){alert("A carteira já está vazia.");return}if(!confirm("EXCLUIR permanentemente TODOS os investimentos desta conta? Recomendamos fazer backup em JSON antes."))return;
 try{var res=await sb.from("investment_positions").delete().eq("user_id",user.id);if(res.error)throw res.error;filters={category:"",type:"",source:"",search:""};await loadPositions();alert("Carteira zerada no Supabase.")}catch(e){notifyError(e)}};
 el("backup").onclick=function(){download("backup_investimentos.json",JSON.stringify({version:2,exportedAt:new Date().toISOString(),assets:data},null,2),"application/json")};
