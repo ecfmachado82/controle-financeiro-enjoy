@@ -20,9 +20,9 @@ async function loadPositions(){
  if(!user||user.id!==uid)return;
  data=result.data||[];render();if(window.MarketPanel)window.MarketPanel.refresh();
 }
-function notifyError(e){alert("Falha na sincronização: "+(e&&e.message?e.message:String(e))+". Nenhuma alteração local foi considerada salva.")}
+function notifyError(e){alert("Não foi possível concluir a operação. Verifique a conexão e tente novamente. Caso persista, contate o suporte.")}
 async function refresh(){try{await loadPositions()}catch(e){notifyError(e)}}
-function payload(a){return {user_id:user.id,ticker:a.ticker,name:a.name||"",category:a.category||"Outros",type:a.type||"",source:a.source||"",qty:a.qty??0,price:a.price,value:a.value??0,gain:a.gain,notes:a.notes||"",purchase_price:a.purchase_price??null,dividends_received:a.dividends_received??0}}
+function payload(a){if(!user)throw Error("Sessão encerrada");return Object.assign({user_id:user.id},SecurityUtils.validatePosition(a))}
 function selectOptions(id){var vals=[...new Set(data.map(function(a){return a[id]}).filter(Boolean))].sort();el(id).innerHTML='<option value="">Todas</option>'+vals.map(function(v){return '<option value="'+escapeHTML(v)+'">'+escapeHTML(v)+'</option>'}).join("");el(id).value=filters[id]}
 function render(){
 ["category","type","source"].forEach(selectOptions);el("search").value=filters.search;
@@ -111,12 +111,47 @@ el("reset").onclick=async function(){
  }
 };
 el("backup").onclick=function(){download("backup_investimentos.json",JSON.stringify({version:2,exportedAt:new Date().toISOString(),assets:data},null,2),"application/json")};
-el("csv").onclick=function(){var keys=["ticker","name","category","type","source","qty","purchase_price","price","value","gain","dividends_received","notes"];download("carteira.csv","\ufeff"+keys.join(";")+"\r\n"+selection().map(function(a){return keys.map(function(k){return '"'+String(a[k]??"").replace(/"/g,'""')+'"'}).join(";")}).join("\r\n"),"text/csv;charset=utf-8")};
+el("csv").onclick=function(){
+ var keys=["ticker","name","category","type","source","qty","purchase_price","price","value","gain","dividends_received","notes"];
+ var numericColumns=["qty","purchase_price","price","value","gain","dividends_received"];
+ var rows=selection().map(function(a){return keys.map(function(k){return SecurityUtils.safeCsvCell(a[k],!numericColumns.includes(k))}).join(";")});
+ download("carteira.csv","\ufeff"+keys.join(";")+"\r\n"+rows.join("\r\n"),"text/csv;charset=utf-8");
+};
 el("import").onclick=function(){if(user)el("file").click()};
-el("file").onchange=async function(e){var f=e.target.files[0];if(!f)return;
-try{var obj=JSON.parse(await f.text()),arr=Array.isArray(obj)?obj:obj.assets;if(!Array.isArray(arr)||arr.some(function(a){return typeof a.ticker!=="string"||!isFinite(Number(a.value))||Number(a.value)<0}))throw Error("Arquivo inválido");
-if(!confirm("Adicionar "+arr.length+" posições à SUA conta? Os registros existentes serão mantidos."))return;
-var items=arr.map(function(a){return payload(a)});for(var i=0;i<items.length;i+=100){var res=await sb.from("investment_positions").insert(items.slice(i,i+100));if(res.error)throw res.error}await loadPositions();alert("Importação concluída.")}catch(err){notifyError(err)}finally{e.target.value=""}};
+el("file").onchange=async function(e){
+ var f=e.target.files[0];if(!f||!user)return;
+ try{
+   if(f.size>SecurityUtils.MAX_FILE_BYTES)throw Error("Backup muito grande. Limite: 1 MB.");
+   var records=SecurityUtils.parseBackupObject(JSON.parse(await f.text()));
+   var identity=function(a){return a.ticker.toUpperCase()+"|"+(a.source||"").trim().toLowerCase()};
+   var already=new Set(data.map(identity));
+   var accepted=[],skipped=0;
+   records.forEach(function(a){
+     var key=identity(a);
+     if(already.has(key)){skipped++;return}
+     already.add(key);accepted.push(a);
+   });
+   if(!accepted.length){alert("Nenhuma posição nova: os investimentos já aparecem na carteira. Nenhum dado foi alterado.");return}
+   var summary="Serão adicionados "+accepted.length+" investimentos.";
+   if(skipped)summary+="\n"+skipped+" possível(is) duplicata(s) com mesmo ticker e instituição serão ignoradas.";
+   summary+="\nPosições já cadastradas não serão alteradas. Confirma?";
+   if(!confirm(summary))return;
+   var completed=0;
+   for(var i=0;i<accepted.length;i+=50){
+     if(!user)throw Error("Sessão encerrada");
+     var items=accepted.slice(i,i+50).map(payload);
+     var res=await sb.from("investment_positions").insert(items);
+     if(res.error)throw res.error;
+     completed+=items.length;
+   }
+   await loadPositions();
+   alert(completed+" investimento(s) importado(s) com sucesso. "+skipped+" duplicata(s) ignorada(s).");
+ }catch(err){
+   // Mensagens de validação local são controladas pelo próprio aplicativo.
+   if(err&&typeof err.message==="string"&&/^(Backup muito grande|O arquivo JSON|O backup|Importe no máximo|Campo|Valor ausente|Número|Código de ativo|Categoria não reconhecida|Posição inválida)/.test(err.message))alert(err.message);
+   else notifyError(err);
+ }finally{e.target.value=""}
+};
 if(window.InvestmentImageImport){window.InvestmentImageImport.attach({
   db:sb,
   getUser:function(){return user;},
@@ -126,7 +161,7 @@ if(window.InvestmentImageImport){window.InvestmentImageImport.attach({
 function authMessage(msg){el("authMessage").textContent=msg||""}
 function showAuth(){el("appScreen").hidden=true;el("authScreen").hidden=false;el("authPass").value="";authMessage("");setMode("login")}
 function showApp(){el("authScreen").hidden=true;el("appScreen").hidden=false;el("userEmail").textContent=user.email||"Minha conta";render()}
-function setMode(mode){authMode=mode;el("nameLabel").style.display=mode==="signup"?"block":"none";el("authName").required=mode==="signup";el("emailLabel").style.display=mode==="newpassword"?"none":"block";el("authEmail").required=mode!=="newpassword";el("passLabel").style.display=mode==="reset"?"none":"block";el("authPass").required=mode!=="reset";el("authPass").autocomplete=(mode==="signup"||mode==="newpassword")?"new-password":"current-password";el("authSubmit").textContent=mode==="signup"?"Criar minha conta":mode==="reset"?"Enviar recuperação":mode==="newpassword"?"Salvar nova senha":"Entrar";authMessage("")}
+function setMode(mode){authMode=mode;el("nameLabel").style.display=mode==="signup"?"block":"none";el("authName").required=mode==="signup";el("emailLabel").style.display=mode==="newpassword"?"none":"block";el("authEmail").required=mode!=="newpassword";el("passLabel").style.display=mode==="reset"?"none":"block";el("authPass").required=mode!=="reset";el("authPass").autocomplete=(mode==="signup"||mode==="newpassword")?"new-password":"current-password";el("authPass").minLength=(mode==="signup"||mode==="newpassword")?10:1;el("authSubmit").textContent=mode==="signup"?"Criar minha conta":mode==="reset"?"Enviar recuperação":mode==="newpassword"?"Salvar nova senha":"Entrar";authMessage("")}
 el("modeLogin").onclick=function(){setMode("login")};el("modeSignup").onclick=function(){setMode("signup")};el("modeReset").onclick=function(){setMode("reset")};
 el("resendConfirmation").onclick=async function(){
  var email=el("authEmail").value.trim();
@@ -142,11 +177,11 @@ el("resendConfirmation").onclick=async function(){
 };
 el("authForm").onsubmit=async function(e){e.preventDefault();var email=el("authEmail").value.trim(),password=el("authPass").value,button=el("authSubmit");button.disabled=true;authMessage("");
 try{
- if(authMode==="newpassword"){if(password.length<8)throw Error("Use ao menos 8 caracteres na nova senha.");var updated=await sb.auth.updateUser({password:password});if(updated.error)throw updated.error;recoveryMode=false;await sb.auth.signOut();showAuth();authMessage("Senha atualizada. Entre com sua nova senha.");}
- else if(authMode==="signup"){var opts={emailRedirectTo:PRODUCTION_URL, data:{display_name:el("authName").value.trim()}};var r=await sb.auth.signUp({email,password,options:opts});if(r.error)throw r.error;authMessage(r.data.session?"Conta criada!":"Cadastro recebido. Verifique seu e-mail para confirmar a conta. Se o link anterior falhou, corrija os redirecionamentos no Supabase e clique em Reenviar confirmação.");}
+ if(authMode==="newpassword"){if(password.length<10)throw Error("Use ao menos 10 caracteres na nova senha.");var updated=await sb.auth.updateUser({password:password});if(updated.error)throw updated.error;recoveryMode=false;await sb.auth.signOut();showAuth();authMessage("Senha atualizada. Entre com sua nova senha.");}
+ else if(authMode==="signup"){if(password.length<10)throw Error("Use ao menos 10 caracteres para criar a senha.");var opts={emailRedirectTo:PRODUCTION_URL, data:{display_name:el("authName").value.trim()}};var r=await sb.auth.signUp({email,password,options:opts});if(r.error)throw r.error;authMessage(r.data.session?"Conta criada!":"Cadastro recebido. Verifique seu e-mail para confirmar a conta. Se o link anterior falhou, corrija os redirecionamentos no Supabase e clique em Reenviar confirmação.");}
  else if(authMode==="reset"){var r=await sb.auth.resetPasswordForEmail(email,{redirectTo:PRODUCTION_URL});if(r.error)throw r.error;authMessage("Se o e-mail estiver cadastrado, você receberá instruções para recuperar a senha.");}
  else{var r=await sb.auth.signInWithPassword({email,password});if(r.error)throw r.error;}
-}catch(err){authMessage(err.message||"Não foi possível concluir a operação.")}finally{button.disabled=false}};
+}catch(err){authMessage((err&&/Use ao menos 10 caracteres/.test(err.message||""))?err.message:(authMode==="login"?"Não foi possível entrar. Confira suas credenciais ou confirme seu e-mail.":"Não foi possível concluir esta solicitação agora. Confira os dados e tente novamente."))}finally{button.disabled=false}};
 async function sessionUpdate(nextUser){if(recoveryMode)return;if((user&&nextUser&&user.id===nextUser.id)||(!user&&!nextUser))return;user=nextUser;data=[];if(!user){showAuth();return}showApp();try{var profile=await sb.from("investment_profiles").upsert({user_id:user.id,display_name:String(user.user_metadata&&user.user_metadata.display_name||"").slice(0,120)},{onConflict:"user_id",ignoreDuplicates:true});if(profile.error)throw profile.error;await loadPositions()}catch(err){notifyError(err)}}
 sb.auth.onAuthStateChange(function(event,session){if(event==="PASSWORD_RECOVERY"){recoveryMode=true;user=null;data=[];el("appScreen").hidden=true;el("authScreen").hidden=false;setMode("newpassword");authMessage("Escolha sua nova senha para concluir a recuperação.");return}setTimeout(function(){sessionUpdate(session&&session.user||null)},0)});
 (async function(){try{var r=await sb.auth.getUser();if(r.error&&r.error.name!=="AuthSessionMissingError")throw r.error;await sessionUpdate(r.data.user||null)}catch(err){showAuth();authMessage(err.message||"Falha ao carregar sessão.")}})();
