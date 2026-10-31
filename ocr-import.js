@@ -141,7 +141,7 @@ window.InvestmentImageImport={parseImageText:parseImageText,attach:function(api)
    if(!confirm("Salvar "+chosen.length+" investimento(s) revisado(s) na sua conta?"))return;
    setBusy(true);var success=0,errors=[],userId=api.getUser().id;
    for(var j=0;j<chosen.length;j++){
-      var item=chosen[j],p={ticker:item.ticker,name:item.name||item.ticker,category:item.category,type:item.type||"",source:item.source||"",qty:item.qty===null?0:item.qty,price:item.price,value:item.value,gain:item.gain,notes:(item.notes||"").slice(0,2000)};
+      var item=chosen[j],p=SecurityUtils.validatePosition({ticker:item.ticker,name:item.name||item.ticker,category:item.category,type:item.type||"",source:item.source||"",qty:item.qty===null?0:item.qty,price:item.price,value:item.value,gain:item.gain,notes:(item.notes||"").slice(0,2000)});
       try{
         if(!api.getUser()||api.getUser().id!==userId)throw Error("Sessão alterada.");
         var res;
@@ -173,6 +173,10 @@ window.InvestmentImageImport={parseImageText:parseImageText,attach:function(api)
    var files=Array.from(input.files||[]);input.value="";if(!files.length||!api.getUser())return;
    if(files.length>5){alert("Envie até cinco imagens de cada vez.");return;}
    if(files.some(function(f){return !["image/png","image/jpeg","image/webp"].includes(f.type)||f.size>12*1024*1024;})){alert("Use imagens PNG, JPG ou WEBP de até 12 MB cada.");return;}
+   try{
+     var checks=await Promise.all(files.map(function(f){return SecurityUtils.imageSignatureMatches(f)}));
+     if(checks.some(function(valid){return !valid})){alert("Uma imagem não corresponde ao formato declarado. Use um PNG, JPG ou WebP legítimo.");return;}
+   }catch(_){alert("Não foi possível validar o conteúdo da imagem.");return;}
    cleanup();
    files.forEach(function(f){
      var u=URL.createObjectURL(f);fileUrls.push(u);
